@@ -30,7 +30,7 @@ public abstract class Cliente {
     @Column(name = "telefone")
     private String telefone;
 
-    @Column(name = "data_cadastro, updatable = false")
+    @Column(name = "data_cadastro", updatable = false)
     private LocalDate dataCadastro;
 
     @OneToOne(cascade = CascadeType.ALL)
