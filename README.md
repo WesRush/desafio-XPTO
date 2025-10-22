@@ -33,6 +33,8 @@ A regra de cobrança por movimentação é:
 ### 2.4. Endereços
 * O sistema deve possuir um CRUD de endereços.
 * Deve ser possível efetuar a manutenção (atualização) dos endereços dos clientes.
+* **Manutenção:** O sistema permite a manutenção dos endereços dos clientes. A criação e atualização do endereço são realizadas através dos endpoints de criação (`POST /api/clientes`) e atualização (`PUT /api/clientes/{id}`) do próprio cliente, garantindo a associação correta.
+* **Leitura Independente:** Foi implementado um endpoint (`GET /api/enderecos/{id}`) para permitir a consulta direta de um endereço pelo seu ID, caso necessário. A exclusão independente foi omitida para manter a integridade referencial com o cliente.
 
 ## 3. Relatórios e Saídas de Dados
 
@@ -89,5 +91,7 @@ Esta seção detalha as boas práticas de desenvolvimento e os padrões de proje
 * **Abordagem do Stored Procedure/Function:** A intenção original era implementar o cálculo das taxas da XPTO utilizando um Stored Procedure com parâmetro `OUT`, conforme exigência do desafio . No entanto, devido a problemas persistentes, a chamada a procedures/functions com parâmetros `OUT` ou mesmo via `@NamedStoredProcedureQuery`/`@Query` nativa falhava consistentemente. Para garantir a funcionalidade do relatório e cumprir o prazo, optou-se por mover o cálculo da taxa para a camada de serviço Java (`ClienteService`). Para cumprir o requisito *técnico* de chamar um objeto de banco, foi criada e chamada com sucesso uma Stored Function (`fn_calcular_taxa_xpto`) que realiza o mesmo cálculo, utilizando `EntityManager.createNativeQuery` para execução direta, contornando as abstrações que apresentavam problemas.
 * **Tecnologias Utilizadas:** Java 8, Spring Boot 2.7.18, Spring Data JPA, Hibernate, MySQL, Lombok, SpringFox (Swagger).
 * **Banco de Dados:** MySQL, conforme flexibilidade dada no e-mail de instrução.
-* **Escopo:** Foram implementados os requisitos mínimos obrigatórios: CRUD de Clientes (Create e Read) e o Relatório de Saldo do Cliente. 
-* **O tratamento de exceções foi aprimorado.** 
+* **Escopo:** 
+  - Foram implementados os requisitos mínimos obrigatórios: CRUD de Clientes (Create e Read) e o Relatório de Saldo do Cliente. 
+  - O tratamento de exceções foi aprimorado. 
+  - **Gerenciamento de Endereços** (vinculado ao cliente, com leitura independente)
