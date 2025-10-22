@@ -73,7 +73,8 @@ Esta seção detalha as boas práticas de desenvolvimento e os padrões de proje
 * **Uso de `BigDecimal`:** O tipo `BigDecimal` foi utilizado para representar valores monetários (`saldoInicial`, `valor` da movimentação), evitando problemas de arredondamento comuns com `float` ou `double`.
 * **API RESTful:** Os endpoints foram projetados seguindo princípios REST, utilizando os verbos HTTP apropriados (`POST` para criar, `GET` para ler) e URLs baseadas em recursos (`/api/clientes`).
 * **Documentação com Swagger (OpenAPI):** A dependência `springfox-boot-starter` foi adicionada e configurada (`SwaggerConfig.java`) para gerar documentação interativa da API, facilitando testes e o entendimento dos endpoints.
-
+* **Testes Unitários (JUnit + Mockito):** Foi criada uma classe de testes (`ClienteServiceTest`) utilizando JUnit 5 e Mockito para validar a lógica de negócio do `ClienteService` de forma isolada, começando pelo método `criarNovoCliente`.
+* **Saída Formatada no Console:** O endpoint do Relatório de Saldo (`GET /api/clientes/{id}/relatorio-saldo`), além de retornar o JSON, imprime uma versão formatada e legível do relatório no console da IDE, facilitando a visualização e depuração, conforme flexibilidade permitida.
 ### 5.2. Padrões de Projeto (Design Patterns)
 * **Repository Pattern:** Implementado automaticamente pelo Spring Data JPA através das interfaces que estendem `JpaRepository` (`ClienteRepository`, `MovimentacaoRepository`, etc.). Abstrai os detalhes de acesso aos dados.
 * **Service Layer Pattern:** A classe `ClienteService` atua como uma camada de serviço, encapsulando a lógica de negócio e orquestrando as interações entre os `Controllers` e os `Repositories`.
