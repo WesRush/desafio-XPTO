@@ -6,6 +6,7 @@ import br.com.financeiro.xpto.desafio_xpto.dto.ClienteUpdateDTO;
 import br.com.financeiro.xpto.desafio_xpto.dto.EnderecoDTO;
 import br.com.financeiro.xpto.desafio_xpto.dto.RelatorioSaldoClienteDTO;
 import br.com.financeiro.xpto.desafio_xpto.entity.*;
+import br.com.financeiro.xpto.desafio_xpto.exception.ResourceNotFoundException;
 import br.com.financeiro.xpto.desafio_xpto.repository.ClienteRepository;
 import br.com.financeiro.xpto.desafio_xpto.repository.MovimentacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,6 @@ public class ClienteService {
         this.entityManager = entityManager;
     }
 
-    
     @Transactional
     public Cliente criarNovoCliente(ClienteRequestDTO request){
         Cliente novoCliente = getCliente(request);
@@ -100,14 +100,14 @@ public class ClienteService {
         return novoCliente;
     }
 
-    
+
     @Transactional(readOnly = true)
     public Cliente buscarClientePorId(Long clienteId){
         Optional<Cliente> clienteOptional = clienteRepository.findById(clienteId);
         if (clienteOptional.isPresent()) {
             return clienteOptional.get();
         }else {
-            throw new RuntimeException("Cliente não encontrado com ID: "+clienteId);
+            throw new ResourceNotFoundException("Cliente não encontrado com ID: "+clienteId);
         }
     }
 

@@ -75,10 +75,6 @@ public class ClienteController {
         List<Cliente> clientes = clienteService.listarTodosClientes();
         return ResponseEntity.ok(clientes);
     }
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException(RuntimeException ex){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
     @PutMapping("/{id}")
     public ResponseEntity<Cliente> atulizarCliente(
             @PathVariable("id") Long clienteId,
