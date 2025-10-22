@@ -4,6 +4,7 @@ import br.com.financeiro.xpto.desafio_xpto.domain.enums.TipoMovimentacao;
 import br.com.financeiro.xpto.desafio_xpto.dto.MovimentacaoRequestDTO;
 import br.com.financeiro.xpto.desafio_xpto.entity.Conta;
 import br.com.financeiro.xpto.desafio_xpto.entity.Movimentacao;
+import br.com.financeiro.xpto.desafio_xpto.exception.SaldoInsuficienteException;
 import br.com.financeiro.xpto.desafio_xpto.repository.ContaRepository;
 import br.com.financeiro.xpto.desafio_xpto.repository.MovimentacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class MovimentacaoService {
         if (requestDTO.getTipoMovimentacao()== TipoMovimentacao.DEBITO){
             BigDecimal saldoAtual = calcularSaldoAtual(conta);
             if (saldoAtual.compareTo(requestDTO.getValor()) < 0){ // saldoAtual < valor débito
-                throw new RuntimeException("Saldo insuficiente na conta "+ contaId+
+                throw new SaldoInsuficienteException("Saldo insuficiente na conta "+ contaId+
                         ". Saldo atual: "+ saldoAtual+
                         ", Valor do débito: "+ requestDTO.getValor());
             }
