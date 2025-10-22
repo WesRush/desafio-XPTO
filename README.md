@@ -54,3 +54,39 @@ O sistema deve fornecer as seguintes funções de relatório:
     * Listagem de clientes, quantidade de movimentações e o valor pago por elas (receita).
     * Total geral de receitas da XPTO no período.
 
+---
+## 5. Boas Práticas e Padrões de Projeto
+
+Esta seção detalha as boas práticas de desenvolvimento e os padrões de projeto utilizados na implementação atual.
+
+### 5.1. Boas Práticas Adotadas
+* **Separação de Responsabilidades:** O projeto foi estruturado em camadas lógicas distintas para facilitar a manutenção e organização:
+    * `controller`: Responsável por expor a API REST e receber/responder requisições HTTP.
+    * `service`: Contém a lógica de negócio principal (regras de cadastro, cálculo do relatório).
+    * `repository`: Abstrai o acesso aos dados, interagindo com o banco de dados via Spring Data JPA.
+    * `entity`: Define as entidades (tabelas) do banco de dados.
+    * `dto`: Utiliza Data Transfer Objects para transportar dados entre as camadas `controller` e `service`, evitando a exposição direta das entidades na API.
+* **Injeção de Dependência (DI):** Utilizada extensivamente pelo Spring Boot para gerenciar as instâncias das classes (ex: injetar o `ClienteService` no `ClienteController`, injetar os `Repositories` e o `EntityManager` no `ClienteService`). Foi adotada a **injeção via construtor** no `ClienteService`, que é considerada uma melhor prática.
+* **Tratamento de Exceções:** Implementado um handler básico no `ClienteController` (`@ExceptionHandler`) para capturar `RuntimeException` (como "Cliente não encontrado") e retornar um status HTTP 404 Not Found apropriado, em vez de um erro 500 genérico.
+* **Uso de `Optional`:** O método `buscarClientePorId` no `ClienteService` utiliza `Optional<Cliente>` retornado pelo `findById` do repositório para tratar caso de um cliente não ser encontrado.
+* **Transacionalidade (`@Transactional`):** A anotação `@Transactional` foi utilizada nos métodos do `ClienteService` que modificam dados (`criarNovoCliente`) para garantir a atomicidade das operações no banco de dados. A opção `readOnly = true` foi usada nos métodos de consulta (`buscarClientePorId`, `listarTodosClientes`, `gerarRelatorioSaldoCliente`) para otimização de performance.
+* **Uso de `BigDecimal`:** O tipo `BigDecimal` foi utilizado para representar valores monetários (`saldoInicial`, `valor` da movimentação), evitando problemas de arredondamento comuns com `float` ou `double`.
+* **API RESTful:** Os endpoints foram projetados seguindo princípios REST, utilizando os verbos HTTP apropriados (`POST` para criar, `GET` para ler) e URLs baseadas em recursos (`/api/clientes`).
+* **Documentação com Swagger (OpenAPI):** A dependência `springfox-boot-starter` foi adicionada e configurada (`SwaggerConfig.java`) para gerar documentação interativa da API, facilitando testes e o entendimento dos endpoints.
+* **Testes Unitários (JUnit + Mockito):** Foi criada uma classe de testes (`ClienteServiceTest`) utilizando JUnit 5 e Mockito para validar a lógica de negócio do `ClienteService` de forma isolada, começando pelo método `criarNovoCliente`.
+* **Saída Formatada no Console:** O endpoint do Relatório de Saldo (`GET /api/clientes/{id}/relatorio-saldo`), além de retornar o JSON, imprime uma versão formatada e legível do relatório no console da IDE, facilitando a visualização e depuração, conforme flexibilidade permitida.
+### 5.2. Padrões de Projeto (Design Patterns)
+* **Repository Pattern:** Implementado automaticamente pelo Spring Data JPA através das interfaces que estendem `JpaRepository` (`ClienteRepository`, `MovimentacaoRepository`, etc.). Abstrai os detalhes de acesso aos dados.
+* **Service Layer Pattern:** A classe `ClienteService` atua como uma camada de serviço, encapsulando a lógica de negócio e orquestrando as interações entre os `Controllers` e os `Repositories`.
+* **Data Transfer Object (DTO) Pattern:** Utilizado com as classes no pacote `dto` (`ClienteRequestDTO`, `EnderecoDTO`, `ContaInicialDTO`, `RelatorioSaldoClienteDTO`) para transferir dados entre as camadas sem expor as entidades JPA.
+* **Builder Pattern:** Utilizado nas entidades (`Movimentacao`) e DTOs (`RelatorioSaldoClienteDTO`) através da anotação `@Builder` do Lombok, facilitando a criação de objetos complexos com muitos campos.
+* **JPA Inheritance (Single Table Strategy):** A estratégia de Herança de Tabela Única (`@Inheritance(strategy = InheritanceType.SINGLE_TABLE)`) foi utilizada na entidade `Cliente` para mapear as classes `Cliente` (abstrata), `PessoaFisica` e `PessoaJuridica` em uma única tabela no banco de dados, resolvendo o requisito de normalização PF/PJ.
+
+---
+## 6. Observações Adicionais
+
+
+* **Abordagem do Stored Procedure/Function:** A intenção original era implementar o cálculo das taxas da XPTO utilizando um Stored Procedure com parâmetro `OUT`, conforme exigência do desafio . No entanto, devido a problemas persistentes, a chamada a procedures/functions com parâmetros `OUT` ou mesmo via `@NamedStoredProcedureQuery`/`@Query` nativa falhava consistentemente. Para garantir a funcionalidade do relatório e cumprir o prazo, optou-se por mover o cálculo da taxa para a camada de serviço Java (`ClienteService`). Para cumprir o requisito *técnico* de chamar um objeto de banco, foi criada e chamada com sucesso uma Stored Function (`fn_calcular_taxa_xpto`) que realiza o mesmo cálculo, utilizando `EntityManager.createNativeQuery` para execução direta, contornando as abstrações que apresentavam problemas.
+* **Tecnologias Utilizadas:** Java 8, Spring Boot 2.7.18, Spring Data JPA, Hibernate, MySQL, Lombok, SpringFox (Swagger).
+* **Banco de Dados:** MySQL, conforme flexibilidade dada no e-mail de instrução.
+* **Escopo:** Foram implementados os requisitos mínimos obrigatórios: CRUD de Clientes (Create e Read) e o Relatório de Saldo do Cliente.

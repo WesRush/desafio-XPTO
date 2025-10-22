@@ -6,11 +6,11 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
 @Entity
 @Table(name="cliente")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -30,7 +30,7 @@ public abstract class Cliente {
     @Column(name = "telefone")
     private String telefone;
 
-    @Column(name = "data_cadastro, updatable = false")
+    @Column(name = "data_cadastro", updatable = false)
     private LocalDate dataCadastro;
 
     @OneToOne(cascade = CascadeType.ALL)
