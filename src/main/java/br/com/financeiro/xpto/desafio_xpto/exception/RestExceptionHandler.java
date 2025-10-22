@@ -58,4 +58,19 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(RegraNegocioException.class)
+    public ResponseEntity<Object> handleRegraNegocioException(
+            RegraNegocioException ex, WebRequest request) {
+
+        logger.warn("Regra de negócio violada: {}", ex.getMessage()); // Loga como aviso
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value()); // 400
+        body.put("error", "Bad Request");
+        body.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
 }

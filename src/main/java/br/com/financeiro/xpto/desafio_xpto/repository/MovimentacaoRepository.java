@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface MovimentacaoRepository extends JpaRepository<Movimentacao, Long> {
     List<Movimentacao> findByContaId( Long contaId);
+
+    long countByContaId(Long contaId);
 }
