@@ -11,7 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -33,6 +36,38 @@ public class ClienteController {
     @GetMapping("/{id}/relatorio-saldo")
     public ResponseEntity<RelatorioSaldoClienteDTO> getRelatorioSaldo(@PathVariable("id") Long clienteId) {
         RelatorioSaldoClienteDTO relatorio = clienteService.gerarRelatorioSaldoCliente(clienteId);
+
+        Locale localeBR = new Locale("pt", "BR");
+        NumberFormat formatadorMoeda = NumberFormat.getCurrencyInstance(localeBR);
+        DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        StringBuilder relatorioFormatado = new StringBuilder();
+        relatorioFormatado.append("\n=============================================\n");
+        relatorioFormatado.append("         RELATÓRIO DE SALDO CLIENTE\n");
+        relatorioFormatado.append("---------------------------------------------\n");
+        relatorioFormatado.append(String.format("Cliente: %s - Cliente desde: %s\n",
+                relatorio.getNomeCliente(),
+                relatorio.getClienteDesde().format(formatadorData)));
+        relatorioFormatado.append(String.format("Endereço: %s\n",
+                relatorio.getEnderecoCompleto()));
+        relatorioFormatado.append("---------------------------------------------\n");
+        relatorioFormatado.append(String.format("Movimentações de crédito: %d\n",
+                relatorio.getMovimentacoesCredito()));
+        relatorioFormatado.append(String.format("Movimentações de débito: %d\n",
+                relatorio.getMovimentacoesDebito()));
+        relatorioFormatado.append(String.format("Total de movimentações (pagas): %d\n",
+                relatorio.getTotalMovimentacoes()));
+        relatorioFormatado.append(String.format("Valor pago pelas movimentações: %s\n",
+                formatadorMoeda.format(relatorio.getValorPagoMovimentacoes())));
+        relatorioFormatado.append("---------------------------------------------\n");
+        relatorioFormatado.append(String.format("Saldo inicial: %s\n",
+                formatadorMoeda.format(relatorio.getSaldoInicial())));
+        relatorioFormatado.append(String.format("Saldo atual: %s\n",
+                formatadorMoeda.format(relatorio.getSaldoAtual())));
+        relatorioFormatado.append("=============================================\n");
+
+        System.out.println(relatorioFormatado.toString());
+
         return ResponseEntity.ok(relatorio);
     }
     @GetMapping
