@@ -17,10 +17,11 @@ O sistema deve permitir o gerenciamento (CRUD) dos clientes, suas contas e ender
 * **Manutenção:** Deve ser possível atualizar os dados do cliente, mas com atenção para não alterar dados que comprometam o histórico de movimentações.
 
 ### 2.2. Contas e Movimentações
-* Um cliente pode ter múltiplas contas bancárias cadastradas (C1, C2, C3).
-* Todas as movimentações (pagamentos e recebimentos) são feitas através dessas contas.
-* **CRUD de Contas:** O sistema deve ter um CRUD para as contas.
-* **Exclusão Lógica:** Caso uma conta possua movimentações associadas, ela não poderá ser alterada; a exclusão deve ser apenas lógica.
+* Um cliente pode ter múltiplas contas bancárias cadastradas. Todas as movimentações são feitas através dessas contas.
+* **CRUD de Contas:** O sistema possui um CRUD completo para gerenciar as contas de um cliente (`POST /api/clientes/{cliId}/contas`, `GET /api/contas/{id}`, `GET /api/clientes/{cliId}/contas`, `PUT /api/contas/{id}`, `DELETE /api/contas/{id}`).
+* **Manutenção Restrita:** A atualização (`PUT /api/contas/{id}`) só é permitida se a conta **não possuir** nenhuma movimentação associada, para preservar o histórico financeiro. Uma exceção (`RegraNegocioException`, resultando em HTTP 400) é lançada caso contrário.
+* **Exclusão Lógica:** A exclusão (`DELETE /api/contas/{id}`) é implementada de forma **lógica**, marcando a conta como inativa (`ativo = false`) em vez de removê-la fisicamente do banco de dados. As listagens de contas (`GET /api/clientes/{cliId}/contas`) retornam apenas contas ativas.
+* **Adição de Movimentações:** Um endpoint (`POST /api/contas/{contaId}/movimentacoes`) permite adicionar novas movimentações (crédito/débito) a uma conta existente, com validação de saldo para operações de débito.
 
 ### 2.3. Cálculo de Receita da XPTO
 A receita da XPTO é calculada com base no volume de operações (entradas e saídas) de cada cliente, em um período de 30 dias a partir da data de cadastro do cliente.
@@ -77,6 +78,8 @@ Esta seção detalha as boas práticas de desenvolvimento e os padrões de proje
 * **Documentação com Swagger (OpenAPI):** A dependência `springfox-boot-starter` foi adicionada e configurada (`SwaggerConfig.java`) para gerar documentação interativa da API, facilitando testes e o entendimento dos endpoints.
 * **Testes Unitários (JUnit + Mockito):** Foi criada uma classe de testes (`ClienteServiceTest`) utilizando JUnit 5 e Mockito para validar a lógica de negócio do `ClienteService` de forma isolada, começando pelo método `criarNovoCliente`.
 * **Saída Formatada no Console:** O endpoint do Relatório de Saldo (`GET /api/clientes/{id}/relatorio-saldo`), além de retornar o JSON, imprime uma versão formatada e legível do relatório no console da IDE, facilitando a visualização e depuração, conforme flexibilidade permitida.
+* **Exclusão Lógica:**  Implementada a exclusão lógica para a entidade `Conta` (campo `ativo`), conforme requisito, preservando o histórico mesmo após a desativação de uma conta. As consultas foram ajustadas para retornar apenas registros ativos por padrão.
+* **Regras de Negócio no Serviço:** Validações de negócio, como a restrição de atualização de contas com movimentações e a verificação de saldo para débitos, foram implementadas na camada de Serviço (`ContaService`, `MovimentacaoService`), lançando exceções customizadas (`RegraNegocioException`, `SaldoInsuficienteException`).
 ### 5.2. Padrões de Projeto (Design Patterns)
 * **Repository Pattern:** Implementado automaticamente pelo Spring Data JPA através das interfaces que estendem `JpaRepository` (`ClienteRepository`, `MovimentacaoRepository`, etc.). Abstrai os detalhes de acesso aos dados.
 * **Service Layer Pattern:** A classe `ClienteService` atua como uma camada de serviço, encapsulando a lógica de negócio e orquestrando as interações entre os `Controllers` e os `Repositories`.
@@ -92,6 +95,7 @@ Esta seção detalha as boas práticas de desenvolvimento e os padrões de proje
 * **Tecnologias Utilizadas:** Java 8, Spring Boot 2.7.18, Spring Data JPA, Hibernate, MySQL, Lombok, SpringFox (Swagger).
 * **Banco de Dados:** MySQL, conforme flexibilidade dada no e-mail de instrução.
 * **Escopo:** 
-  - Foram implementados os requisitos mínimos obrigatórios: CRUD de Clientes (Create e Read) e o Relatório de Saldo do Cliente. 
+  - Foram implementados os requisitos mínimos obrigatórios: CRUD de Clientes (Create e Read), CRUD de Contas (com regras de manutenção e exclusão lógica) e o Relatório de Saldo do Cliente. 
   - O tratamento de exceções foi aprimorado. 
-  - **Gerenciamento de Endereços** (vinculado ao cliente, com leitura independente)
+  - Gerenciamento de Endereços (vinculado ao cliente, com leitura independente)
+  
