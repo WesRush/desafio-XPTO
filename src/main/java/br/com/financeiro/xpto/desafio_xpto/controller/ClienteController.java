@@ -2,6 +2,7 @@ package br.com.financeiro.xpto.desafio_xpto.controller;
 
 
 import br.com.financeiro.xpto.desafio_xpto.dto.ClienteRequestDTO;
+import br.com.financeiro.xpto.desafio_xpto.dto.ClienteUpdateDTO;
 import br.com.financeiro.xpto.desafio_xpto.dto.RelatorioSaldoClienteDTO;
 import br.com.financeiro.xpto.desafio_xpto.entity.Cliente;
 import br.com.financeiro.xpto.desafio_xpto.service.ClienteService;
@@ -43,6 +44,21 @@ public class ClienteController {
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Cliente> atulizarCliente(
+            @PathVariable("id") Long clienteId,
+            @RequestBody ClienteUpdateDTO atulizacaoDados){
+        Cliente clienteAtualizado = clienteService.atualizarCliente(clienteId, atulizacaoDados);
+                return ResponseEntity.ok(clienteAtualizado);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarCliente(
+            @PathVariable("id") Long clienteId){
+        clienteService.deletarCliente(clienteId);
+        return ResponseEntity.noContent().build();
+    }
+
 
     }
 

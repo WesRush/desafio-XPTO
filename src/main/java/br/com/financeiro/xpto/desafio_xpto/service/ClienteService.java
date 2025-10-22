@@ -2,6 +2,8 @@ package br.com.financeiro.xpto.desafio_xpto.service;
 
 import br.com.financeiro.xpto.desafio_xpto.domain.enums.TipoMovimentacao;
 import br.com.financeiro.xpto.desafio_xpto.dto.ClienteRequestDTO;
+import br.com.financeiro.xpto.desafio_xpto.dto.ClienteUpdateDTO;
+import br.com.financeiro.xpto.desafio_xpto.dto.EnderecoDTO;
 import br.com.financeiro.xpto.desafio_xpto.dto.RelatorioSaldoClienteDTO;
 import br.com.financeiro.xpto.desafio_xpto.entity.*;
 import br.com.financeiro.xpto.desafio_xpto.repository.ClienteRepository;
@@ -190,4 +192,35 @@ public class ClienteService {
                 .saldoAtual(saldoAtual)
                 .build();
     }
-}
+    @Transactional
+    public Cliente atualizarCliente(Long clienteId, ClienteUpdateDTO atualizacaoDados){
+        Cliente clienteExistente = this.buscarClientePorId(clienteId);
+        if (Objects.nonNull(atualizacaoDados.getNome())){
+            clienteExistente.setNome(atualizacaoDados.getNome());
+        }
+        if (Objects.nonNull(atualizacaoDados.getTelefone())) {
+            clienteExistente.setTelefone(atualizacaoDados.getTelefone());
+        }
+        if (Objects.nonNull(atualizacaoDados.getEndereco())){
+            EnderecoDTO enderecoDTO = atualizacaoDados.getEndereco();
+            Endereco enderecoEntity = clienteExistente.getEndereco();
+            if (enderecoEntity == null){
+                enderecoEntity = new Endereco();
+                clienteExistente.setEndereco(enderecoEntity);
+            }
+            if (Objects.nonNull(enderecoDTO.getRua())) enderecoEntity.setRua(enderecoDTO.getRua());
+            if (Objects.nonNull(enderecoDTO.getNumero())) enderecoEntity.setNumero(enderecoDTO.getNumero());
+            if (Objects.nonNull(enderecoDTO.getComplemento())) enderecoEntity.setComplemento(enderecoDTO.getComplemento());
+            if (Objects.nonNull(enderecoDTO.getBairro())) enderecoEntity.setBairro(enderecoDTO.getBairro());
+            if (Objects.nonNull(enderecoDTO.getCidade())) enderecoEntity.setCidade(enderecoDTO.getCidade());
+            if (Objects.nonNull(enderecoDTO.getUf())) enderecoEntity.setUf(enderecoDTO.getUf());
+            if (Objects.nonNull(enderecoDTO.getCep())) enderecoEntity.setCep(enderecoDTO.getCep());
+        }
+        return clienteRepository.save(clienteExistente);
+        }
+        @Transactional
+        public void deletarCliente(Long clienteId){
+        this.buscarClientePorId(clienteId);
+        clienteRepository.deleteById(clienteId);
+        }
+    }
