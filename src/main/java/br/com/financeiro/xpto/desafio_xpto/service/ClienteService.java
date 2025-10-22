@@ -33,10 +33,7 @@ public class ClienteService {
         this.entityManager = entityManager;
     }
 
-    /**
-     * === MÉTODO 1: CRIAR NOVO CLIENTE ===
-     * (Sua lógica refatorada - está perfeita)
-     */
+    
     @Transactional
     public Cliente criarNovoCliente(ClienteRequestDTO request){
         Cliente novoCliente = getCliente(request);
@@ -103,10 +100,7 @@ public class ClienteService {
         return novoCliente;
     }
 
-    /**
-     * === MÉTODO 2: BUSCAR POR ID ===
-     * (Sua lógica original - está perfeita)
-     */
+    
     @Transactional(readOnly = true)
     public Cliente buscarClientePorId(Long clienteId){
         Optional<Cliente> clienteOptional = clienteRepository.findById(clienteId);
